@@ -1,0 +1,15 @@
+# Ignore datasets
+Data/
+
+# Ignore local config
+config.local.json
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Virtual environment
+.venv/
