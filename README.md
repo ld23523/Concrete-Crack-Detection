@@ -1,19 +1,24 @@
-# Concrete Crack Detection (ResNet18)
+# Concrete Crack Detection
 
-## Overview
-Binary crack detection using ResNet18 on:
+Deep learning project for classification and segmentation of concrete cracks.
+
+## Models
+- ResNet-18
+- EfficientNet-B3
+- MobileNetV2
+- U-Net (segmentation)
+
+## Datasets
 - Kaggle Concrete Crack Dataset
-- CrackForest Dataset
-- Maguire SDNET2018 Dataset
+- CrackForest Dataset (CFD)
+- SDNET2018
 
-## Model
-- Architecture: ResNet18
-- Loss: BCEWithLogitsLoss
-- Optimizer: Adam
-- Epochs: 5
-- Image size: 224x224
+## Setup
+```bash
+pip install -r requirements.txt
+```
 
-## Data
-Datasets are not included.
-Update `config.local.json` with your dataset paths.
-
+## Train
+```bash
+python scripts/train_classification.py
+```

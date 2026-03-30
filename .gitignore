@@ -1,15 +1,21 @@
-# Ignore datasets
-Data/
-
 # Ignore local config
 config.local.json
 
-# Python cache
+# Python
 __pycache__/
 *.pyc
 
-# Jupyter checkpoints
-.ipynb_checkpoints/
+# Data
+data/raw/
+data/processed/
 
-# Virtual environment
-.venv/
+# Experiments
+experiments/logs/
+experiments/checkpoints/
+
+# Env
+venv/
+.env
+
+# OS
+.DS_Store
