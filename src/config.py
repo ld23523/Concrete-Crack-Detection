@@ -12,7 +12,7 @@ FIGURES_DIR = "../outputs/figures"
 # ======================
 # Training parameters
 # ======================
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 NUM_EPOCHS = 5
 LEARNING_RATE = 0.001
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -20,15 +20,20 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # ======================
 # Model parameters
 # ======================
-MODEL_NAME = "mobilenet_v2"
+MODEL_NAME = "mobilenet"
 NUM_CLASSES = 2  # Crack / No Crack
 
 # ======================
 # Data augmentation
 # ======================
-IMAGE_SIZE = 227  # Default input size for ResNet/EfficientNet
+IMAGE_SIZE = 224
 
 # ======================
 # Random seed for reproducibility
 # ======================
 SEED = 42
+
+# ======================
+# Task type
+# ======================
+TASK = "classification"  # or "segmentation"

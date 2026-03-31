@@ -3,7 +3,7 @@
 import torch
 import torch.nn as nn
 from torchvision import models
-from src.config import NUM_CLASSES, DEVICE
+from config import NUM_CLASSES, DEVICE
 
 class MobileNetV2Classifier(nn.Module):
     """
