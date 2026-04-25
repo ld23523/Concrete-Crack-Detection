@@ -13,7 +13,7 @@ FIGURES_DIR = "outputs/figures"
 # Training parameters
 # ======================
 BATCH_SIZE = 16
-NUM_EPOCHS = 5
+NUM_EPOCHS = 1
 LEARNING_RATE = 0.001
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -21,6 +21,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Model parameters
 # ======================
 MODEL_NAME = "mobilenet_v2"
+DATASET_NAME = "concrete_crack"
 NUM_CLASSES = 2  # Crack / No Crack
 
 # ======================

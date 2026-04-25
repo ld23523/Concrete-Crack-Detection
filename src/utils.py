@@ -1,8 +1,12 @@
+import datetime
 import os
+import csv
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
+
+from src.config import TASK, MODEL_NAME, DATASET_NAME
 
 # ===========================
 # Checkpoints and saving models
@@ -83,3 +87,23 @@ def save_predictions(images, labels, preds, output_dir, prefix="segmentation", n
         plt.imsave(os.path.join(output_dir, f"{prefix}_pred_{i}.png"), pred, cmap='jet')
 
     print(f"Predictions saved to {output_dir}")
+
+# ===========================
+# Saving results
+# ===========================
+
+def save_results(results, output_path):
+    """Save evaluation results to a CSV file with Time,Model,Dataset,Task,Validation Loss,Accuracy,Precision,Recall,F1"""
+    fieldnames = ["Time", "Model", "Dataset", "Task"] + list(results.keys())
+    with open(output_path, mode='a', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        if os.stat(output_path).st_size == 0:  # Write header if file is new
+            writer.writeheader()
+        row = {
+            "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Model": MODEL_NAME,
+            "Dataset": DATASET_NAME,
+            "Task": TASK,
+            **results
+        }
+        writer.writerow(row)

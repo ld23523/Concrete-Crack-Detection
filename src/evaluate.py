@@ -3,15 +3,15 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from src.dataset import CrackDataset
-from src.models import (
+from dataset import CrackDataset
+from models import (
     resnet,
     efficientnet,
     mobilenet,
     unet,
 )
-from src.utils import log_metrics, visualize_predictions, save_predictions
-from src.config import (
+from transforms import get_classification_transforms, SegmentationTransform
+from config import (
     PROCESSED_DATA_DIR,
     CHECKPOINT_DIR,
     LOG_DIR,
@@ -24,6 +24,7 @@ from src.config import (
     SEED,
     TASK,
 )
+from utils import log_metrics, save_results
 
 def set_random_seed(seed):
     """Set random seed for reproducibility"""
@@ -48,7 +49,7 @@ def evaluate_classification(model, val_loader, criterion):
     all_preds = []
     
     with torch.no_grad():
-        for images, labels in val_loader:
+        for i, (images, labels) in enumerate(val_loader):
             images, labels = images.to(DEVICE), labels.to(DEVICE)
             outputs = model(images)
             loss = criterion(outputs, labels)
@@ -58,6 +59,8 @@ def evaluate_classification(model, val_loader, criterion):
             total_preds += labels.size(0)
             all_labels.extend(labels.cpu().numpy())
             all_preds.extend(predicted.cpu().numpy())
+            if i % 50 == 0:
+                print(f"Processed batch {i}")
     
     accuracy = correct_preds / total_preds
     precision, recall, f1 = calculate_classification_metrics(all_labels, all_preds)
@@ -95,15 +98,17 @@ def calculate_classification_metrics(labels, preds):
 
 def calculate_iou(preds, labels):
     """Calculate Intersection over Union (IoU) for segmentation"""
-    preds = (preds > 0.5).float()
-    intersection = (preds & labels).sum()
-    union = (preds | labels).sum()
+    preds = torch.sigmoid(preds) > 0.5
+    preds = preds.float()
+    intersection = (preds * labels).sum()
+    union = (preds + labels).sum() - intersection
     return intersection / union if union != 0 else 0.0
 
 def calculate_dice(preds, labels):
     """Calculate Dice coefficient for segmentation"""
-    preds = (preds > 0.5).float()
-    intersection = (preds & labels).sum()
+    preds = torch.sigmoid(preds) > 0.5
+    preds = preds.float()
+    intersection = (preds * labels).sum()
     total = preds.sum() + labels.sum()
     return 2 * intersection / total if total != 0 else 0.0
 
@@ -111,12 +116,19 @@ def main():
     set_random_seed(SEED)
 
     # Load the dataset
-    val_data = CrackDataset(PROCESSED_DATA_DIR, task="classification", image_size=IMAGE_SIZE)
+    if TASK == "classification":
+        val_transform = get_classification_transforms(IMAGE_SIZE, train=False)
+        val_data = CrackDataset(os.path.join(PROCESSED_DATA_DIR, 'val'), task="classification", image_size=IMAGE_SIZE, transform=val_transform)
+    elif TASK == "segmentation":
+        val_transform = SegmentationTransform(IMAGE_SIZE, train=False)
+        val_data = CrackDataset(os.path.join(PROCESSED_DATA_DIR, 'val'), task="segmentation", image_size=IMAGE_SIZE, transform=val_transform)
+    else:
+        raise ValueError("Invalid task")
     val_loader = DataLoader(val_data, batch_size=BATCH_SIZE, shuffle=False)
 
     # Load model based on config
     if MODEL_NAME == "mobilenet_v2":
-        model = mobilenet.MobileNetV2(num_classes=NUM_CLASSES).to(DEVICE)
+        model = mobilenet.MobileNetV2Classifier(num_classes=NUM_CLASSES).to(DEVICE)
     elif MODEL_NAME == "resnet18":
         model = resnet.ResNet18(num_classes=NUM_CLASSES).to(DEVICE)
     elif MODEL_NAME == "efficientnet_b3":
@@ -130,6 +142,7 @@ def main():
     checkpoint_path = os.path.join(CHECKPOINT_DIR, "checkpoint.pth")
     optimizer = torch.optim.Adam(model.parameters())  # Dummy optimizer to load the checkpoint
     model, optimizer, epoch = load_checkpoint(model, optimizer, checkpoint_path)
+    print(f"Loaded model from {checkpoint_path} at epoch {epoch}")
     
     # Choose the appropriate criterion
     if MODEL_NAME == "unet":
@@ -140,12 +153,36 @@ def main():
     # Evaluate the model
     if "classification" in TASK:
         val_loss, accuracy, precision, recall, f1 = evaluate_classification(model, val_loader, criterion)
+        epoch = 0  # Since we don't have epoch from state_dict
         log_metrics(epoch, val_loss, accuracy, LOG_DIR, mode="validation")
         print(f"Validation Loss: {val_loss:.4f}, Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
+        
+        # Save results to file
+        results = {
+            "Validation Loss": f"{val_loss:.4f}",
+            "Accuracy": f"{accuracy:.4f}",
+            "Precision": f"{precision:.4f}",
+            "Recall": f"{recall:.4f}",
+            "F1": f"{f1:.4f}"
+        }
+        results_path = os.path.join("outputs", "results.csv")
+        save_results(results, results_path)
+        
     elif "segmentation" in TASK:
         val_loss, iou, dice = evaluate_segmentation(model, val_loader, criterion)
+        epoch = 0
         log_metrics(epoch, val_loss, iou, LOG_DIR, mode="validation")
         print(f"Validation Loss: {val_loss:.4f}, IoU: {iou:.4f}, Dice Coefficient: {dice:.4f}")
+        
+        # Save results to file
+        results = {
+            "Validation Loss": f"{val_loss:.4f}",
+            "IoU": f"{iou:.4f}",
+            "Dice Coefficient": f"{dice:.4f}"
+        }
+        results_path = os.path.join("outputs", "results.csv")
+        save_results(results, results_path)
+        
         visualize_predictions(val_loader.dataset[:5], task="segmentation")  # Visualize first 5 images
 
 if __name__ == "__main__":
