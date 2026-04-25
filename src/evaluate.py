@@ -3,6 +3,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
 from dataset import CrackDataset
 from models import (
     resnet,
@@ -18,13 +21,17 @@ from config import (
     FIGURES_DIR,
     BATCH_SIZE,
     DEVICE,
+    DATASET_NAME,
     MODEL_NAME,
     NUM_CLASSES,
     IMAGE_SIZE,
     SEED,
     TASK,
 )
-from utils import log_metrics, save_results
+from utils import log_metrics, save_results, save_predictions
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 def set_random_seed(seed):
     """Set random seed for reproducibility"""
@@ -64,7 +71,7 @@ def evaluate_classification(model, val_loader, criterion):
     
     accuracy = correct_preds / total_preds
     precision, recall, f1 = calculate_classification_metrics(all_labels, all_preds)
-    return val_loss / len(val_loader), accuracy, precision, recall, f1
+    return val_loss / len(val_loader), accuracy, precision, recall, f1, all_labels, all_preds
 
 def evaluate_segmentation(model, val_loader, criterion):
     """Evaluate segmentation model"""
@@ -139,7 +146,7 @@ def main():
         raise ValueError("Invalid model name")
 
     # Load the checkpoint
-    checkpoint_path = os.path.join(CHECKPOINT_DIR, "checkpoint.pth")
+    checkpoint_path = os.path.join(CHECKPOINT_DIR, f"{MODEL_NAME}_{DATASET_NAME}_checkpoint.pth")
     optimizer = torch.optim.Adam(model.parameters())  # Dummy optimizer to load the checkpoint
     model, optimizer, epoch = load_checkpoint(model, optimizer, checkpoint_path)
     print(f"Loaded model from {checkpoint_path} at epoch {epoch}")
@@ -152,9 +159,9 @@ def main():
 
     # Evaluate the model
     if "classification" in TASK:
-        val_loss, accuracy, precision, recall, f1 = evaluate_classification(model, val_loader, criterion)
+        val_loss, accuracy, precision, recall, f1, all_labels, all_preds = evaluate_classification(model, val_loader, criterion)
         epoch = 0  # Since we don't have epoch from state_dict
-        log_metrics(epoch, val_loss, accuracy, LOG_DIR, mode="validation")
+        log_metrics(epoch, val_loss, accuracy, LOG_DIR, mode="validation", metric_name="Accuracy")
         print(f"Validation Loss: {val_loss:.4f}, Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
         
         # Save results to file
@@ -168,10 +175,20 @@ def main():
         results_path = os.path.join("outputs", "results.csv")
         save_results(results, results_path)
         
+        # Save confusion matrix
+        cm = confusion_matrix(all_labels, all_preds)
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['No Crack', 'Crack'], yticklabels=['No Crack', 'Crack'])
+        plt.title(f'Confusion Matrix - {MODEL_NAME} on {DATASET_NAME}')
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        plt.savefig(os.path.join(FIGURES_DIR, f'confusion_matrix_{MODEL_NAME}_{DATASET_NAME}.png'))
+        plt.close()
+        
     elif "segmentation" in TASK:
         val_loss, iou, dice = evaluate_segmentation(model, val_loader, criterion)
         epoch = 0
-        log_metrics(epoch, val_loss, iou, LOG_DIR, mode="validation")
+        log_metrics(epoch, val_loss, iou, LOG_DIR, mode="validation", metric_name="IoU")
         print(f"Validation Loss: {val_loss:.4f}, IoU: {iou:.4f}, Dice Coefficient: {dice:.4f}")
         
         # Save results to file
@@ -183,7 +200,12 @@ def main():
         results_path = os.path.join("outputs", "results.csv")
         save_results(results, results_path)
         
-        visualize_predictions(val_loader.dataset[:5], task="segmentation")  # Visualize first 5 images
+        # Save predictions
+        batch = next(iter(val_loader))
+        images, masks = batch
+        with torch.no_grad():
+            preds = model(images.to(DEVICE)).cpu()
+        save_predictions(images, masks, preds, os.path.join(FIGURES_DIR, f'predictions_{MODEL_NAME}_{DATASET_NAME}'), prefix="segmentation", num_images=5)
 
 if __name__ == "__main__":
     main()

@@ -23,6 +23,7 @@ from config import (
     LEARNING_RATE,
     DEVICE,
     MODEL_NAME,
+    DATASET_NAME,
     NUM_CLASSES,
     IMAGE_SIZE,
     SEED,
@@ -51,11 +52,11 @@ def train_classification(model, train_loader, val_loader, criterion, optimizer):
         val_loss, val_accuracy = validate(model, val_loader, criterion)
 
         # Log metrics (or use TensorBoard)
-        log_metrics(epoch, val_loss, val_accuracy, LOG_DIR)
+        log_metrics(epoch, val_loss, val_accuracy, LOG_DIR, mode="validation", metric_name="Accuracy")
 
         # Save the model checkpoint
         if epoch % 5 == 0:  # Save every 5 epochs (adjust as needed)
-            save_checkpoint(model, optimizer, epoch, CHECKPOINT_DIR)
+            save_checkpoint(model, optimizer, epoch, CHECKPOINT_DIR, filename=f"{MODEL_NAME}_{DATASET_NAME}_checkpoint.pth")
 
 def train_segmentation(model, train_loader, val_loader, criterion, optimizer):
     """Training loop for segmentation task"""
@@ -74,11 +75,11 @@ def train_segmentation(model, train_loader, val_loader, criterion, optimizer):
         val_loss, val_iou = validate_segmentation(model, val_loader, criterion)
 
         # Log metrics (IoU for segmentation)
-        log_metrics(epoch, val_loss, val_iou, LOG_DIR)
+        log_metrics(epoch, val_loss, val_iou, LOG_DIR, mode="validation", metric_name="IoU")
 
         # Save the model checkpoint
         if epoch % 5 == 0:  # Save every 5 epochs (adjust as needed)
-            save_checkpoint(model, optimizer, epoch, CHECKPOINT_DIR)
+            save_checkpoint(model, optimizer, epoch, CHECKPOINT_DIR, filename=f"{MODEL_NAME}_{DATASET_NAME}_checkpoint.pth")
 
 def validate(model, val_loader, criterion):
     """Validation loop for classification task"""
@@ -125,6 +126,14 @@ def calculate_iou(preds, labels):
     return intersection / union if union != 0 else 0.0
 
 def main():
+    # Recompute PROCESSED_DATA_DIR
+    if DATASET_NAME in ["concrete_crack", "sdnet"] and TASK == "classification":
+        PROCESSED_DATA_DIR = "data/processed/concrete_crack_75_10_15"
+    elif DATASET_NAME == "crackforest" and TASK == "segmentation":
+        PROCESSED_DATA_DIR = "data/processed_segmentation"
+    else:
+        PROCESSED_DATA_DIR = "data/processed"
+    
     set_random_seed(SEED)
 
     # Load dataset
@@ -148,9 +157,9 @@ def main():
     if MODEL_NAME == "mobilenet_v2":
         model = mobilenet.MobileNetV2Classifier(num_classes=NUM_CLASSES).to(DEVICE)
     elif MODEL_NAME == "resnet18":
-        model = resnet.ResNet18(num_classes=NUM_CLASSES).to(DEVICE)
+        model = resnet.ResNet18Classifier(num_classes=NUM_CLASSES).to(DEVICE)
     elif MODEL_NAME == "efficientnet_b3":
-        model = efficientnet.EfficientNetB3(num_classes=NUM_CLASSES).to(DEVICE)
+        model = efficientnet.EfficientNetB3Classifier(num_classes=NUM_CLASSES).to(DEVICE)
     elif MODEL_NAME == "unet":
         model = unet.get_unet_model(in_channels=3, out_channels=1).to(DEVICE)
     else:
@@ -167,8 +176,8 @@ def main():
         train_segmentation(model, train_loader, val_loader, criterion, optimizer)
 
     # Save final model weights
-    torch.save(model.state_dict(), os.path.join(CHECKPOINT_DIR, 'final_model.pth'))
-    print(f"Final model weights saved to {os.path.join(CHECKPOINT_DIR, 'final_model.pth')}")
+    torch.save(model.state_dict(), os.path.join(CHECKPOINT_DIR, f'{MODEL_NAME}_{DATASET_NAME}_final.pth'))
+    print(f"Final model weights saved to {os.path.join(CHECKPOINT_DIR, f'{MODEL_NAME}_{DATASET_NAME}_final.pth')}")
 
 if __name__ == "__main__":
     main()
