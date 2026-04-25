@@ -4,7 +4,7 @@ import torch
 # Paths
 # ======================
 RAW_DATA_DIR = "data/raw"
-PROCESSED_DATA_DIR = "data/processed"
+PROCESSED_DATA_DIR = "data/processed/concrete_crack_75_10_15"
 CHECKPOINT_DIR = "outputs/checkpoints"
 LOG_DIR = "outputs/logs"
 FIGURES_DIR = "outputs/figures"
@@ -13,7 +13,7 @@ FIGURES_DIR = "outputs/figures"
 # Training parameters
 # ======================
 BATCH_SIZE = 16
-NUM_EPOCHS = 1
+NUM_EPOCHS = 3
 LEARNING_RATE = 0.001
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
