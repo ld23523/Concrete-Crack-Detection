@@ -61,11 +61,15 @@ class CrackDataset(Dataset):
 
         if self.task == "classification":
             label = self.labels[idx]
-            return self._apply_transform(image, label)
+            if self.transform:
+                image = self.transform(image)
+            return image, label
 
         elif self.task == "segmentation":
             mask = Image.open(self.mask_paths[idx]).convert("L")  # Convert mask to grayscale
-            return self._apply_transform(image, mask)
+            if self.transform:
+                image, mask = self.transform(image, mask)
+            return image, mask
 
     def _apply_transform(self, image, target):
         """Apply the transform (if any) to image and target."""

@@ -3,11 +3,11 @@ import torch
 # ======================
 # Paths
 # ======================
-RAW_DATA_DIR = "../data/raw"
-PROCESSED_DATA_DIR = "../data/processed"
-CHECKPOINT_DIR = "../outputs/checkpoints"
-LOG_DIR = "../outputs/logs"
-FIGURES_DIR = "../outputs/figures"
+RAW_DATA_DIR = "data/raw"
+PROCESSED_DATA_DIR = "data/processed"
+CHECKPOINT_DIR = "outputs/checkpoints"
+LOG_DIR = "outputs/logs"
+FIGURES_DIR = "outputs/figures"
 
 # ======================
 # Training parameters
@@ -20,7 +20,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # ======================
 # Model parameters
 # ======================
-MODEL_NAME = "mobilenet"
+MODEL_NAME = "mobilenet_v2"
 NUM_CLASSES = 2  # Crack / No Crack
 
 # ======================

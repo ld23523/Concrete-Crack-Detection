@@ -11,6 +11,7 @@ from models import (
     unet,
 )
 from utils import save_checkpoint, log_metrics
+from transforms import get_classification_transforms, SegmentationTransform
 from config import (
     RAW_DATA_DIR,
     PROCESSED_DATA_DIR,
@@ -104,7 +105,7 @@ def validate_segmentation(model, val_loader, criterion):
     total_iou = 0
     with torch.no_grad():
         for images, masks in val_loader:
-            images, masks = masks.to(DEVICE), masks.to(DEVICE)
+            images, masks = images.to(DEVICE), masks.to(DEVICE)
             outputs = model(images)
             loss = criterion(outputs, masks)
             val_loss += loss.item()
@@ -117,9 +118,10 @@ def validate_segmentation(model, val_loader, criterion):
 
 def calculate_iou(preds, labels):
     """Calculate Intersection over Union (IoU) for segmentation"""
-    preds = (preds > 0.5).float()
-    intersection = (preds & labels).sum()
-    union = (preds | labels).sum()
+    preds = torch.sigmoid(preds) > 0.5
+    preds = preds.float()
+    intersection = (preds * labels).sum()
+    union = (preds + labels).sum() - intersection
     return intersection / union if union != 0 else 0.0
 
 def main():
@@ -127,11 +129,15 @@ def main():
 
     # Load dataset
     if TASK == "classification":
-        train_data = CrackDataset(PROCESSED_DATA_DIR, task="classification", image_size=IMAGE_SIZE)
-        val_data = CrackDataset(PROCESSED_DATA_DIR, task="classification", image_size=IMAGE_SIZE)
+        train_transform = get_classification_transforms(IMAGE_SIZE, train=True)
+        val_transform = get_classification_transforms(IMAGE_SIZE, train=False)
+        train_data = CrackDataset(os.path.join(PROCESSED_DATA_DIR, 'train'), task="classification", image_size=IMAGE_SIZE, transform=train_transform)
+        val_data = CrackDataset(os.path.join(PROCESSED_DATA_DIR, 'val'), task="classification", image_size=IMAGE_SIZE, transform=val_transform)
     elif TASK == "segmentation":
-        train_data = CrackDataset(PROCESSED_DATA_DIR, task="segmentation", image_size=IMAGE_SIZE)
-        val_data = CrackDataset(PROCESSED_DATA_DIR, task="segmentation", image_size=IMAGE_SIZE)
+        train_transform = SegmentationTransform(IMAGE_SIZE, train=True)
+        val_transform = SegmentationTransform(IMAGE_SIZE, train=False)
+        train_data = CrackDataset(os.path.join(PROCESSED_DATA_DIR, 'train'), task="segmentation", image_size=IMAGE_SIZE, transform=train_transform)
+        val_data = CrackDataset(os.path.join(PROCESSED_DATA_DIR, 'val'), task="segmentation", image_size=IMAGE_SIZE, transform=val_transform)
     else:
         raise ValueError("Invalid task. Should be 'classification' or 'segmentation'.")
 
@@ -140,7 +146,7 @@ def main():
 
     # Select model based on config
     if MODEL_NAME == "mobilenet_v2":
-        model = mobilenet.MobileNetV2(num_classes=NUM_CLASSES).to(DEVICE)
+        model = mobilenet.MobileNetV2Classifier(num_classes=NUM_CLASSES).to(DEVICE)
     elif MODEL_NAME == "resnet18":
         model = resnet.ResNet18(num_classes=NUM_CLASSES).to(DEVICE)
     elif MODEL_NAME == "efficientnet_b3":
@@ -159,6 +165,10 @@ def main():
         train_classification(model, train_loader, val_loader, criterion, optimizer)
     elif TASK == "segmentation":
         train_segmentation(model, train_loader, val_loader, criterion, optimizer)
+
+    # Save final model weights
+    torch.save(model.state_dict(), os.path.join(CHECKPOINT_DIR, 'final_model.pth'))
+    print(f"Final model weights saved to {os.path.join(CHECKPOINT_DIR, 'final_model.pth')}")
 
 if __name__ == "__main__":
     main()
