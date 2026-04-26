@@ -1,0 +1,2 @@
+run_id,accuracy,precision,recall,f1_score,train_dataset_dir,test_dataset_dir,auto_split,source_dir,split_ratio,epochs,batch_size,learning_rate,img_size,train_subset,val_subset,test_subset,freeze_backbone,output_dir,resume_checkpoint,test_checkpoint,test_only,use_tensorboard
+20260425_202241,0.9677163794810854,0.9690565370723101,0.9677163794810854,0.9679091080032088,data/processed/structural_defects_50_20_30/,,True,data/raw/structural_defects,"(0.5, 0.2, 0.3)",3,16,0.001,224,0.5,0.2,0.3,False,experiments,,,False,True
