@@ -107,7 +107,7 @@ def save_results(results, output_path):
         if os.stat(output_path).st_size == 0:  # Write header if file is new
             writer.writeheader()
         row = {
-            "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "Model": MODEL_NAME,
             "Dataset": DATASET_NAME,
             "Task": TASK,

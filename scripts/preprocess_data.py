@@ -67,6 +67,6 @@ def split_segmentation_data(source_images_dir, source_masks_dir, dest_dir, test_
 
 if __name__ == "__main__":
     # Classification
-    source_dir = './data/raw/concrete_crack/'  # This is the folder with Positive/Negative
-    dest_dir = './data/processed/concrete_crack_75_10_15/'  # Where we want to save the train/val/test split
+    source_dir = './data/raw/structural_defects/'  # This is the folder with Positive/Negative
+    dest_dir = './data/processed/structural_defects_75_10_15/'  # Where we want to save the train/val/test split
     split_data_classification(source_dir, dest_dir, test_size=0.15, val_size=0.1)
