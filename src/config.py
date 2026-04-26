@@ -20,7 +20,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # ======================
 # Model parameters
 # ======================
-MODEL_NAME = "mobilenet_v2"
+MODEL_NAME = "resnet18"
 DATASET_NAME = "concrete_crack"
 NUM_CLASSES = 2  # Crack / No Crack
 

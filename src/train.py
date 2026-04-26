@@ -148,7 +148,7 @@ def main():
     if MODEL_NAME == "mobilenet_v2":
         model = mobilenet.MobileNetV2Classifier(num_classes=NUM_CLASSES).to(DEVICE)
     elif MODEL_NAME == "resnet18":
-        model = resnet.ResNet18(num_classes=NUM_CLASSES).to(DEVICE)
+        model = resnet.ResNet18Classifier(num_classes=NUM_CLASSES).to(DEVICE)
     elif MODEL_NAME == "efficientnet_b3":
         model = efficientnet.EfficientNetB3(num_classes=NUM_CLASSES).to(DEVICE)
     elif MODEL_NAME == "unet":

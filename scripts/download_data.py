@@ -17,17 +17,17 @@ if __name__ == "__main__":
     # Download Crack Concrete Images for Classification dataset
     download_kaggle_dataset(
         path = kagglehub.dataset_download("arnavr10880/concrete-crack-images-for-classification"),
-        target_dir = "../data/raw/concrete_crack"
+        target_dir = "./data/raw/concrete_crack"
     )
 
     # Download Crackforest dataset
     download_kaggle_dataset(
         path = kagglehub.dataset_download("mahendrachouhanml/crackforest"),
-        target_dir = "../data/raw/crackforest"
+        target_dir = "./data/raw/crackforest"
     )
 
     # Download SDNET 2018 dataset
     download_kaggle_dataset(
         path = kagglehub.dataset_download("aniruddhsharma/structural-defects-network-concrete-crack-images"),
-        target_dir = "../data/raw/structural_defects"
+        target_dir = "./data/raw/structural_defects"
     )

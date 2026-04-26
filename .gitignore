@@ -8,14 +8,23 @@ __pycache__/
 # Data
 data/raw/
 data/processed/
+data/processed_sdnet/
 
 # Experiments
 experiments/logs/
 experiments/checkpoints/
 
 # Env
-venv/
+.venv/
 .env
 
 # OS
 .DS_Store
+
+# Outputs (keep only important ones)
+outputs/*
+!outputs/*.csv
+
+# Model weights
+*.pt
+*.pth
