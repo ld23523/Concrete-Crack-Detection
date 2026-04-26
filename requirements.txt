@@ -12,3 +12,4 @@ kagglehub
 tensorboard          # Added for tensorboard logging
 tensorboardX         # Optional, for advanced logging (if needed)
 Pillow               # For image handling (PIL images)
+efficientnet-pytorch  # For EfficientNet models

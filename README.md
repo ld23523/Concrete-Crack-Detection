@@ -1,6 +1,6 @@
 # Concrete Crack Detection
 
-Deep learning project for classification and segmentation of concrete cracks.
+Machine learning project for classification and segmentation of concrete cracks.
 
 ## Models
 - ResNet-18
@@ -13,12 +13,19 @@ Deep learning project for classification and segmentation of concrete cracks.
 - CrackForest Dataset (CFD)
 - SDNET2018
 
+# METHODOLOGY
+Segmentation: Use U-Net with ResNet-18 encoder on CrackForest dataset
+
+Training Experimentation:
+- Data size experiment: Train models using 25%, 50%, 75%, and 100% of the training data.
+- Hyperparameter tuning: Compare different learning rates (0.001, 0.0001, etc).
+- Data Augmentation: Rotate images, flip images, change images brightness/contrast.
+- Cross-Dataset Generalization: Train on Kaggle dataset, then test on SDNET 2018, and vice versa.
+Evaluation Metrics:
+- Classification: Accuracy, Precision, Recall, F1-score, and Confusion Matrix.
+- Segmentation: Intersection over Union (IoU) and Dice coefficient.
+
 ## Setup
 ```bash
 pip install -r requirements.txt
-```
-
-## Train
-```bash
-python scripts/train_classification.py
 ```

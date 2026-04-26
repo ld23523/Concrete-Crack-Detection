@@ -26,16 +26,16 @@ def save_checkpoint(model, optimizer, epoch, checkpoint_dir, filename="checkpoin
 # Logging metrics
 # ===========================
 
-def log_metrics(epoch, loss, accuracy, log_dir, mode='train'):
+def log_metrics(epoch, loss, metric, log_dir, mode='train', metric_name='Accuracy'):
     """Log metrics to TensorBoard"""
     writer = SummaryWriter(log_dir=log_dir)
     
     # Add metrics to TensorBoard
     writer.add_scalar(f'{mode}/Loss', loss, epoch)
-    writer.add_scalar(f'{mode}/Accuracy', accuracy, epoch)
+    writer.add_scalar(f'{mode}/{metric_name}', metric, epoch)
     
     writer.close()
-    print(f"Metrics logged for {mode} at epoch {epoch}: Loss = {loss:.4f}, Accuracy = {accuracy:.4f}")
+    print(f"Metrics logged for {mode} at epoch {epoch}: Loss = {loss:.4f}, {metric_name} = {metric:.4f}")
 
 # ===========================
 # Visualization functions
@@ -74,17 +74,24 @@ def visualize_segmentation(images, labels, preds, num_images=5):
 def save_predictions(images, labels, preds, output_dir, prefix="segmentation", num_images=5):
     """Save images of predictions, labels, and inputs"""
     os.makedirs(output_dir, exist_ok=True)
-    for i in range(num_images):
+    for i in range(min(num_images, len(images))):
         image = images[i].permute(1, 2, 0).cpu().numpy()  # CHW to HWC
         label = labels[i].cpu().numpy()
         pred = preds[i].cpu().numpy()
+        
+        # For segmentation, apply sigmoid and threshold
+        if prefix == "segmentation":
+            pred = torch.sigmoid(torch.tensor(pred)).numpy()
+            pred = (pred > 0.5).astype(np.float32)
+            if pred.ndim == 3:
+                pred = pred.squeeze(0)  # Remove channel dim
         
         # Save original image
         plt.imsave(os.path.join(output_dir, f"{prefix}_image_{i}.png"), image)
         
         # Save label and prediction
         plt.imsave(os.path.join(output_dir, f"{prefix}_label_{i}.png"), label, cmap='gray')
-        plt.imsave(os.path.join(output_dir, f"{prefix}_pred_{i}.png"), pred, cmap='jet')
+        plt.imsave(os.path.join(output_dir, f"{prefix}_pred_{i}.png"), pred, cmap='gray')
 
     print(f"Predictions saved to {output_dir}")
 
