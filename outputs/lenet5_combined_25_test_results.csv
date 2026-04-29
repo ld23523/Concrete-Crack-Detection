@@ -1,2 +1,0 @@
-training_data,test_data,loss,accuracy,precision_macro,recall_macro,macro_f1
-25% original train + 25% SDNET train,25% SDNET test,0.4236641151760772,0.840778097982709,0.6547151771336553,0.5745694882367208,0.5894414493514003
