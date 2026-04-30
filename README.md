@@ -31,10 +31,9 @@ pip install -r requirements.txt
 ```
 
 ## Project Structure
-data/
-  raw/
-  processed/
-  processed_sdnet/
-models/
-scripts/
-outputs/
+project/
+├── data/        (datasets)
+├── outputs/     (results, graphs, models)
+├── scripts/     (download data, prepeocess data)
+└── src/      (ResNet, EfficientNet, MobileNet, U-Net)
+
