@@ -29,3 +29,11 @@ Evaluation Metrics:
 ```bash
 pip install -r requirements.txt
 ```
+##Project Structure
+data/
+  raw/
+  processed/
+  processed_sdnet/
+models/
+scripts/
+outputs/
