@@ -30,6 +30,11 @@ Evaluation Metrics:
 pip install -r requirements.txt
 ```
 
+## Download Datasets
+```bash
+python scripts/download_data.py
+```
+
 ## Project Structure
 project/
 ├── data/        (datasets)
