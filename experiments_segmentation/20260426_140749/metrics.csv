@@ -1,2 +1,0 @@
-run_id,iou,dice,train_dataset_dir,val_dataset_dir,test_dataset_dir,epochs,batch_size,learning_rate,img_size,freeze_backbone,output_dir,resume_checkpoint,test_checkpoint,test_only,use_tensorboard
-20260426_140749,0.25053526997134035,0.40068485228475315,data\processed\crackforest_augmented_50_15_35\train,data\processed\crackforest_augmented_50_15_35\val,data\processed\crackforest_augmented_50_15_35\test,30,32,0.0001,224,False,experiments_segmentation,,,False,True

@@ -37,8 +37,14 @@ python scripts/download_data.py
 
 ## Project Structure
 project/
+
 ├── data/        (datasets)
+
+├── notebooks/        (Jupyter notebook)
+
 ├── outputs/     (results, graphs, models)
+
 ├── scripts/     (download data, prepeocess data)
+
 └── src/      (ResNet, EfficientNet, MobileNet, U-Net)
 

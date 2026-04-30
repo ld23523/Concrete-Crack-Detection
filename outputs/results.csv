@@ -1,2 +1,0 @@
-Time,Model,Dataset,Task,Validation Loss,Accuracy,Precision,Recall,F1
-2026-04-25 05:18:11,mobilenet_v2,concrete_crack,classification,0.0126,0.9969,0.9950,0.9989,0.9969

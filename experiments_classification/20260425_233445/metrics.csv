@@ -1,2 +1,0 @@
-run_id,accuracy,precision,recall,f1_score,train_dataset_dir,test_dataset_dir,auto_split,source_dir,split_ratio,epochs,batch_size,learning_rate,img_size,train_subset,val_subset,test_subset,freeze_backbone,output_dir,resume_checkpoint,test_checkpoint,test_only,use_tensorboard
-20260425_233445,0.530825,0.5781349641816521,0.530825,0.5496090458424377,data/raw/structural_defects/,data/raw/concrete_crack/,True,data/raw/concrete_crack/,"(0.0, 0.0, 1.0)",3,16,0.001,224,0.0,0.0,1.0,False,experiments,,experiments\20260425_202241\epoch_3.pth,True,True
